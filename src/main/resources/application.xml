@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/aop
+        http://www.springframework.org/schema/aop/spring-aop-2.0.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <!-- 开启注解开关 -->
+    <context:annotation-config />
+
+    <!-- 定义一个通知 -->
+    <bean id="advice" class="aop.SleepHelper" />
+
+    <!-- 定义一个切点 -->
+    <bean id="sleepPointCut" class="org.springframework.aop.support.JdkRegexpMethodPointcut">
+        <property name="pattern" value=".*sleep.*"></property>  <!--规则：第一个*表示任意返回值，第二个*表示任意参数-->
+    </bean>
+
+    <!-- 将通知和切点关联起来-->
+    <bean id="sleepHelpAdvice" class="org.springframework.aop.support.DefaultPointcutAdvisor">
+        <property name="advice" ref="advice"/>
+        <property name="pointcut" ref="sleepPointCut" />
+    </bean>
+
+    <!-- 定义目标对象 -->
+    <bean id="human" class="aop.Human" />
+
+    <!-- 用来产生代理对象-->
+    <bean id="humanProxy" class="org.springframework.aop.framework.ProxyFactoryBean">
+        <property name="targetName" value="human" />  <!-- 这里必须配置bean-->
+        <property name="interceptorNames" value="sleepHelpAdvice" /> <!--这里是value不是ref是因为interceptorNames是一个string-->
+        <property name="proxyInterfaces" value="aop.SleepAble"/>
+    </bean>
+</beans>
